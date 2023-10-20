@@ -1,17 +1,27 @@
-const express = require("express");
+const express = require('express');
+const getRoutes = require('./routes/getRoutes')
 const app = express();
-const getRoutes = require("./routes/getRoutes");
-
-const PORT = 3001;
-
-//middlewares
+const ngrok = require('ngrok');
+const {authtoken} = require('./auth')
+const PORT = process.env.PORT || 3000;
+//middleware
 app.use(express.json());
-app.use(express.static("public"))
+app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
+//routes
+app.use('/', getRoutes);
 
-app.use("/api/v1", getRoutes);
-
-app.listen(PORT, () => {
-    console.log("App running in port:", PORT)
+app.listen(PORT,()=>{
+    console.log(`started at ${PORT}`);      
 });
+//connecting ngrok 
+//you can signup to ngrok website and get your own authToken
+(async function(){
+    const url = await ngrok.connect({
+        proto:'http',
+        addr:PORT,
+        authtoken: authtoken
+    });
+    console.log(url);
+})();
